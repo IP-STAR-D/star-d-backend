@@ -10,10 +10,10 @@ module.exports = app => {
     router.get("/:id", exams.findOne);
 
     // Retrieve all the exams with a professor_id
-    router.get("/:professor_id", exams.findAll);
+    router.get("/professor/:professor_id", exams.findAll);
 
     // Retrieve all the exams with a degree_id
-    router.get("/:degree_id", exams.findAll);
+    router.get("/degree/:degree_id", exams.findAll);
   
     app.use('/exams', router);
   };

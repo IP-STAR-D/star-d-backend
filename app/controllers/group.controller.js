@@ -17,7 +17,7 @@ exports.findAll = (req, res) => {
 
 // Find a single Group with an id
 exports.findOne = (req, res) => {
-  const group_id = req.params.group_id;
+  const group_id = req.params.id;
 
   Group.findByPk(group_id)
     .then((data) => {
@@ -38,7 +38,7 @@ exports.findOne = (req, res) => {
 
 // Find a single Group with a degree_id
 exports.findOne = (req, res) => {
-  const degree_id = req.params.degree_id;
+  const degree_id = req.params.id;
 
   Group.findByFk(degree_id)
     .then((data) => {

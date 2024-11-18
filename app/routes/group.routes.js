@@ -10,7 +10,7 @@ module.exports = app => {
     router.get("/:id", groups.findOne);
 
     // Retrieve all the groups with a degree_id
-    router.get("/:degree_id", groups.findAll);
+    router.get("/degree/:degree_id", groups.findAll);
 
     // Retrieve all the groups by a an
     router.get("/:an", groups.findAll);

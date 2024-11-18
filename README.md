@@ -10,6 +10,16 @@ Backend for an exam appointments management system made by Star-D team
 ```
 npm install
 ```
+- .env example
+```
+PORT=
+
+DB_HOST=
+DB_PASSWORD=
+DB_USER=
+DB_NAME=postgres
+DB_PORT=6543
+```
 - Build and run the project
 ```
 npm start

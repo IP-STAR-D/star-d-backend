@@ -18,9 +18,9 @@ module.exports = (sequelize, Sequelize) => {
       field: "boss_id",
       allowNull: false,
     },
-    year: {
+    an: {
       type: 'TIMESTAMP',
-      field: "year",
+      field: "an",
       allowNull: false,
     },
   });

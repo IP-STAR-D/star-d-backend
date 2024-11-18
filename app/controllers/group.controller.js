@@ -57,23 +57,23 @@ exports.findOne = (req, res) => {
     });
 };
 
-// Find a single Group by a year
+// Find a single Group by a an
 exports.findOne = (req, res) => {
-    const year = req.params.year;
+    const an = req.params.an;
   
-    Group.findBy(year)
+    Group.findBy(an)
       .then((data) => {
         if (data) {
           res.send(data);
         } else {
           res.status(404).send({
-            message: `Cannot find  with year=${year}.`,
+            message: `Cannot find  with an=${an}.`,
           });
         }
       })
       .catch((err) => {
         res.status(500).send({
-          message: "Error retrieving Group with year=" + year,
+          message: "Error retrieving Group with an=" + an,
         });
       });
   };

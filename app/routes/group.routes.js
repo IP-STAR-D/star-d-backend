@@ -12,8 +12,8 @@ module.exports = app => {
     // Retrieve all the groups with a degree_id
     router.get("/:degree_id", groups.findAll);
 
-    // Retrieve all the groups by a year
-    router.get("/:year", groups.findAll);
+    // Retrieve all the groups by a an
+    router.get("/:an", groups.findAll);
 
     app.use('/groups', router);
   };

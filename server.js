@@ -9,7 +9,7 @@ app.use(express.json());
 
 const db = require("./app/models");
 
-db.sequelize.sync({alter:true})
+db.sequelize.sync()
   .then(() => {
     console.log("Synced db.");
   })
@@ -21,6 +21,8 @@ db.sequelize.sync({alter:true})
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to Star-D backend." });
 });
+
+require("./app/routes/user.routes")(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;

@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const express = require("express");
 
 const app = express();
@@ -5,6 +7,15 @@ const app = express();
 // parse requests of content-type - application/json
 app.use(express.json());
 
+const db = require("./app/models");
+
+db.sequelize.sync({alter:true})
+  .then(() => {
+    console.log("Synced db.");
+  })
+  .catch((err) => {
+    console.log("Failed to sync db: " + err.message);
+  });
 
 // simple test route
 app.get("/", (req, res) => {

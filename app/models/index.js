@@ -21,4 +21,6 @@ db.users = require("./user.model.js")(sequelize, Sequelize); // db for users
 
 db.exams = require("./exam.model.js")(sequelize, Sequelize); // db for exams
 
+db.groups = require("./group.model.js")(sequelize, Sequelize); // db for groups
+
 module.exports = db;

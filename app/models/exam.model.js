@@ -8,6 +8,7 @@ module.exports = (sequelize, Sequelize) => {
     },
     professorId: {
       type: Sequelize.INTEGER,
+      foreignKey: true,
       field: "professor_id",
       allowNull: false,
     },
@@ -18,6 +19,7 @@ module.exports = (sequelize, Sequelize) => {
     },
     degreeId: {
       type: Sequelize.INTEGER,
+      foreignKey: true,
       field: "degree_id",
       allowNull: false,
     },

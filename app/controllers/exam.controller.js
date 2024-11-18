@@ -40,7 +40,7 @@ exports.findOne = (req, res) => {
 exports.findOne = (req, res) => {
   const professor_id = req.params.professor_id;
 
-  Exam.findByPk(professor_id)
+  Exam.findByFk(professor_id)
     .then((data) => {
       if (data) {
         res.send(data);
@@ -61,7 +61,7 @@ exports.findOne = (req, res) => {
 exports.findOne = (req, res) => {
   const degree_id = req.params.degree_id;
 
-  Exam.findByPk(degree_id)
+  Exam.findByFk(degree_id)
     .then((data) => {
       if (data) {
         res.send(data);

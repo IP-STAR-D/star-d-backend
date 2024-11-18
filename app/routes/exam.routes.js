@@ -1,5 +1,5 @@
 module.exports = app => {
-    const exams = require("../controllers/exams.controller.js");
+    const exams = require("../controllers/exam.controller.js");
   
     const router = require("express").Router();
   

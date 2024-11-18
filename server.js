@@ -22,7 +22,8 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to Star-D backend." });
 });
 
-require("./app/routes/user.routes")(app);
+require("./app/routes/user.routes")(app); // routing for users
+require("./app/routes/exam.routes")(app); // routing for exams
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;

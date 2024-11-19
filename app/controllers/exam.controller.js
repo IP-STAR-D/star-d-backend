@@ -17,7 +17,7 @@ exports.findAll = (req, res) => {
 
 // Find a single Exam with an id
 exports.findOne = (req, res) => {
-  const exam_id = req.params.exam_id;
+  const exam_id = req.params.id;
 
   Exam.findByPk(exam_id)
     .then((data) => {
@@ -37,12 +37,14 @@ exports.findOne = (req, res) => {
 };
 
 // Find a single Exam with a professor_id
-exports.findOne = (req, res) => {
+exports.findByProfessorId = (req, res) => {
   const professor_id = req.params.professor_id;
 
-  Exam.findByPk(professor_id)
+  Exam.findAll({
+    where: {professor_id: professor_id}
+  })
     .then((data) => {
-      if (data) {
+      if (data && data.length > 0) {
         res.send(data);
       } else {
         res.status(404).send({
@@ -58,12 +60,14 @@ exports.findOne = (req, res) => {
 };
 
 // Find a single Exam with a degree_id
-exports.findOne = (req, res) => {
+exports.findByDegreeId = (req, res) => {
   const degree_id = req.params.degree_id;
 
-  Exam.findByPk(degree_id)
+  Exam.findAll({
+    where: {degree_id: degree_id}
+  })
     .then((data) => {
-      if (data) {
+      if (data && data.length > 0) {
         res.send(data);
       } else {
         res.status(404).send({

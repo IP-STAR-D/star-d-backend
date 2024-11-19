@@ -54,6 +54,29 @@ exports.findOne = (req, res) => {
     });
 };
 
+// Find all Classrooms by capacity
+exports.findByCapacity = (req, res) => {
+  const capacity = req.params.capacity;
+
+  Classroom.findAll({
+    where: { capacity: capacity }
+  })
+    .then((data) => {
+      if (data && data.length > 0) {
+        res.send(data);
+      } else {
+        res.status(404).send({
+          message: `Cannot find Classroom with capacity=${capacity}.`,
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Error retrieving Classroom with capacity=" + capacity,
+      });
+    });
+};
+
 // Update a Classroom by the id in the request
 exports.update = (req, res) => {
   const classroom_id = req.params.id;

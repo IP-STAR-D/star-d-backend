@@ -11,6 +11,9 @@ module.exports = (app) => {
   
     // Retrieve a single classroom with id
     router.get("/:id", classrooms.findOne);
+
+    // Retrieve all classrooms by capacity
+    router.get("/capacity/:capacity", classrooms.findByCapacity);
   
     // Update a classroom with id
     router.put("/:id", classrooms.update);

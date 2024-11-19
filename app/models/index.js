@@ -22,5 +22,6 @@ db.exams = require("./exam.model.js")(sequelize, Sequelize); // db for exams
 db.faculties = require("./faculty.model.js")(sequelize, Sequelize); // db for faculties
 
 db.groups = require("./group.model.js")(sequelize, Sequelize); // db for groups
+db.classrooms = require("./classroom.model.js")(sequelize, Sequelize); // db for classrooms
 
 module.exports = db;

@@ -1,4 +1,4 @@
-require('dotenv').config()
+require("dotenv").config();
 
 const express = require("express");
 
@@ -9,7 +9,8 @@ app.use(express.json());
 
 const db = require("./app/models");
 
-db.sequelize.sync()
+db.sequelize
+  .sync()
   .then(() => {
     console.log("Synced db.");
   })
@@ -26,6 +27,7 @@ require("./app/routes/user.routes")(app); // routing for users
 require("./app/routes/exam.routes")(app); // routing for exams
 require("./app/routes/group.routes")(app); // routing for groups
 require("./app/routes/faculty.routes")(app); // routing for faculties
+require("./app/routes/degree.routes")(app); // routing for degrees
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;

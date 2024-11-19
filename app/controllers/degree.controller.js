@@ -8,7 +8,9 @@ exports.create = (req, res) => {
   const faculty_id = req.body.facultyId;
 
   if (!degree_name || !faculty_id) {
-    return res.status(400).json({ message: "Degree name and faculty ID cannot be empty." });
+    return res
+      .status(400)
+      .json({ message: "Degree name and faculty ID cannot be empty." });
   }
 
   Degree.create({ degreeName: degree_name, facultyId: faculty_id })
@@ -50,6 +52,29 @@ exports.findOne = (req, res) => {
     .catch((err) => {
       res.status(500).send({
         message: "Error retrieving Degree with id=" + degree_id,
+      });
+    });
+};
+
+// Find all Degrees by faculty_id
+exports.findByFacultyId = (req, res) => {
+  const faculty_id = req.params.faculty_id;
+
+  Degree.findAll({
+    where: { faculty_id: faculty_id },
+  })
+    .then((data) => {
+      if (data && data.lenght > 0) {
+        res.send(data);
+      } else {
+        res.status(404).send({
+          message: `Cannot find Degree with faculty_id=${faculty_id}.`,
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Error retrieving Degree with faculty_id=" + faculty_id,
       });
     });
 };

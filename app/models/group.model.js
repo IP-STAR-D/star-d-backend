@@ -11,6 +11,10 @@ module.exports = (sequelize, Sequelize) => {
       foreignKey: true,
       field: "degree_id",
       allowNull: false,
+      references: {
+        model: "degree",
+        key: "degreeId",
+      },
     },
     bossId: {
       type: Sequelize.INTEGER,

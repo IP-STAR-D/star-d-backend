@@ -12,6 +12,9 @@ module.exports = (app) => {
   // Retrieve a single degree with id
   router.get("/:id", degrees.findOne);
 
+  // Retrieve all degrees by faculty_id
+  router.get("/faculty/:faculty_id", degrees.findByFacultyId);
+
   // Update a degree with id
   router.put("/:id", degrees.update);
 

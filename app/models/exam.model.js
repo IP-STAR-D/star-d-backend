@@ -11,6 +11,10 @@ module.exports = (sequelize, Sequelize) => {
       foreignKey: true,
       field: "professor_id",
       allowNull: false,
+      references: {
+        model: "professor",
+        key: "professorId",
+      },
     },
     class_name: {
       type: Sequelize.STRING,
@@ -22,6 +26,10 @@ module.exports = (sequelize, Sequelize) => {
       foreignKey: true,
       field: "degree_id",
       allowNull: false,
+      references: {
+        model: "degree",
+        key: "degreeId",
+      },
     },
     semester: {
       type: Sequelize.INTEGER,

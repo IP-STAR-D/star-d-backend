@@ -64,7 +64,7 @@ exports.findByFacultyId = (req, res) => {
     where: { faculty_id: faculty_id },
   })
     .then((data) => {
-      if (data && data.lenght > 0) {
+      if (data && data.length > 0) {
         res.send(data);
       } else {
         res.status(404).send({

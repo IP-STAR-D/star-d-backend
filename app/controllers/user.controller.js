@@ -19,7 +19,7 @@ exports.findAll = (req, res) => {
 
 // Find a single User with an id
 exports.findOne = (req, res) => {
-  const user_id = req.params.user_id;
+  const user_id = req.params.id;
 
   User.findByPk(user_id)
     .then(data => {

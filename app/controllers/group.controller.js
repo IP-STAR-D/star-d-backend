@@ -17,7 +17,7 @@ exports.findAll = (req, res) => {
 
 // Find a single Group with an id
 exports.findOne = (req, res) => {
-  const group_id = req.params.group_id;
+  const group_id = req.params.id;
 
   Group.findByPk(group_id)
     .then((data) => {
@@ -37,12 +37,14 @@ exports.findOne = (req, res) => {
 };
 
 // Find a single Group with a degree_id
-exports.findOne = (req, res) => {
+exports.findByDegree = (req, res) => {
   const degree_id = req.params.degree_id;
 
-  Group.findByFk(degree_id)
+  Group.findAll({
+    where: { degree_id: degree_id },
+  })
     .then((data) => {
-      if (data) {
+      if (data && data.length > 0) {
         res.send(data);
       } else {
         res.status(404).send({
@@ -57,23 +59,47 @@ exports.findOne = (req, res) => {
     });
 };
 
-// Find a single Group by a year
-exports.findOne = (req, res) => {
-    const year = req.params.year;
-  
-    Group.findBy(year)
-      .then((data) => {
-        if (data) {
-          res.send(data);
-        } else {
-          res.status(404).send({
-            message: `Cannot find  with year=${year}.`,
-          });
-        }
-      })
-      .catch((err) => {
-        res.status(500).send({
-          message: "Error retrieving Group with year=" + year,
+exports.findByBossId = (req, res) => {
+  const boss_id = req.params.boss_id;
+
+  Group.findAll({
+    where: { boss_id: boss_id },
+  })
+    .then((data) => {
+      if (data && data.length > 0) {
+        res.send(data);
+      } else {
+        res.status(404).send({
+          message: `Cannot find  with boss_id=${boss_id}.`,
         });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Error retrieving Group with boss_id=" + boss_id,
       });
-  };
+    });
+};
+
+// Find a single Group by a year
+exports.findByYear = (req, res) => {
+  const year = req.params.year;
+
+  Group.findAll({
+    where: { year: year },
+  })
+    .then((data) => {
+      if (data && data.length > 0) {
+        res.send(data);
+      } else {
+        res.status(404).send({
+          message: `Cannot find  with year=${year}.`,
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Error retrieving Group with year=" + year,
+      });
+    });
+};

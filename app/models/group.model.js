@@ -20,7 +20,7 @@ module.exports = (sequelize, Sequelize) => {
     },
     year: {
       type: 'TIMESTAMP',
-      field: "year",
+      field: "an",
       allowNull: false,
     },
   });

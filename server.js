@@ -30,7 +30,7 @@ require("./app/routes/faculty.routes")(app); // routing for faculties
 require("./app/routes/classroom.routes")(app); // routing for classrooms
 require("./app/routes/degree.routes")(app); // routing for degrees
 require("./app/routes/student.routes")(app); // routing for students
-require("./app/routes/professor.routes")(app); // routing for professor
+require("./app/routes/appointment.routes")(app); // routing for appointment
 
 
 // set port, listen for requests

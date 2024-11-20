@@ -26,6 +26,7 @@ db.groups = require("./group.model.js")(sequelize, Sequelize); // db for groups
 db.classrooms = require("./classroom.model.js")(sequelize, Sequelize); // db for classrooms
 db.students=require("./student.model.js")(sequelize, Sequelize); // db for students
 db.professors=require("./professor.model.js")(sequelize, Sequelize); // db for professors
+db.appointments=require("./appointment.model.js")(sequelize, Sequelize); // db for appointments
 
 
 module.exports = db;

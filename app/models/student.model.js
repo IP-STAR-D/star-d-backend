@@ -5,7 +5,11 @@ module.exports = (sequelize, Sequelize) => {
           type: Sequelize.INTEGER,
           primaryKey: true,
           field: "user_id",
-          allowNull: false,        
+          allowNull: false,  
+          references: {
+            model: "user",
+            key: "userId",
+          },             
         },
         groupId: {
             type: Sequelize.INTEGER,

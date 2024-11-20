@@ -29,6 +29,9 @@ require("./app/routes/group.routes")(app); // routing for groups
 require("./app/routes/faculty.routes")(app); // routing for faculties
 require("./app/routes/classroom.routes")(app); // routing for classrooms
 require("./app/routes/degree.routes")(app); // routing for degrees
+require("./app/routes/student.routes")(app); // routing for students
+require("./app/routes/professor.routes")(app); // routing for professor
+
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;

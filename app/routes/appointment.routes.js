@@ -1,5 +1,6 @@
 module.exports = app => {
     const appointments = require("../controllers/appointment.controller.js");
+    const { authorize } = require('../middlewares/auth.js');
   
     const router = require("express").Router();
   
@@ -21,5 +22,5 @@ module.exports = app => {
     // Retrieve all the appointments with a groupId
     router.get("/group/:groupId", appointments.findByGroupOrExamId);
   
-    app.use('/appointments', router);
+    app.use('/appointments', authorize, router);
   };

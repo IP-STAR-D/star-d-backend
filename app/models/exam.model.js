@@ -12,8 +12,8 @@ module.exports = (sequelize, Sequelize) => {
       field: "professor_id",
       allowNull: false,
       references: {
-        model: "professor",
-        key: "professorId",
+        model: "professors",
+        key: "user_id",
       },
     },
     class_name: {
@@ -27,8 +27,8 @@ module.exports = (sequelize, Sequelize) => {
       field: "degree_id",
       allowNull: false,
       references: {
-        model: "degree",
-        key: "degreeId",
+        model: "degrees",
+        key: "degree_id",
       },
     },
     semester: {

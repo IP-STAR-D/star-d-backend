@@ -6,11 +6,17 @@ module.exports = app => {
     // Retrieve all appointments
     router.get("/", appointments.findAll);
   
-    // Retrieve a single appointments with id
-    router.get("/:id", appointments.findOne);
+    // Retrieve a single appointment with id
+    router.get("/:id", appointments.findOne);  
+
+    // Create appointment
+    router.post("/", appointments.create);
+
+    // Update appointment
+    router.put("/:id", appointments.update);
 
     // Retrieve all the appointments with a ExamId
-    router.get("/Exam/:ExamId", appointments.findByGroupOrExamId);
+    router.get("/Exam/:examId", appointments.findByGroupOrExamId);
 
     // Retrieve all the appointments with a groupId
     router.get("/group/:groupId", appointments.findByGroupOrExamId);

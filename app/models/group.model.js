@@ -12,8 +12,8 @@ module.exports = (sequelize, Sequelize) => {
       field: "degree_id",
       allowNull: false,
       references: {
-        model: "degree",
-        key: "degreeId",
+        model: "degrees",
+        key: "degree_id",
       },
     },
     bossId: {
@@ -23,7 +23,7 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
     },
     year: {
-      type: 'TIMESTAMP',
+      type: Sequelize.INTEGER,
       field: "an",
       allowNull: false,
     },

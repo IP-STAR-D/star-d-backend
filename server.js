@@ -31,6 +31,7 @@ require("./app/routes/classroom.routes")(app); // routing for classrooms
 require("./app/routes/degree.routes")(app); // routing for degrees
 require("./app/routes/student.routes")(app); // routing for students
 require("./app/routes/appointment.routes")(app); // routing for appointment
+require("./app/routes/auth.routes")(app); // routing for auth
 
 
 // set port, listen for requests

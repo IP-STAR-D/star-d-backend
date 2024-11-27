@@ -12,8 +12,8 @@ module.exports = (sequelize, Sequelize) => {
       field: "exam_id",
       allowNull: false,
       references: {
-        model: "exam",
-        key: "examId",
+        model: "exams",
+        key: "exam_id",
       },
     },
     groupId: {
@@ -22,8 +22,8 @@ module.exports = (sequelize, Sequelize) => {
       field: "group_id",
       allowNull: false,
       references: {
-        model: "group",
-        key: "groupId",
+        model: "groups",
+        key: "group_id",
       },
     },
     classroomId: {
@@ -32,8 +32,8 @@ module.exports = (sequelize, Sequelize) => {
       field: "classroom_id",
       allowNull: false,
       references: {
-        model: "classroom",
-        key: "classroomId",
+        model: "classrooms",
+        key: "classroom_id",
       },
     },
     status: {

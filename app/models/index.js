@@ -27,6 +27,7 @@ db.students=require("./student.model.js")(sequelize, Sequelize); // db for stude
 db.professors=require("./professor.model.js")(sequelize, Sequelize); // db for professors
 db.appointments=require("./appointment.model.js")(sequelize, Sequelize); // db for appointments
 
+//relations
 db.users.hasOne(db.professors,{foreignKey: 'userId', sourceKey: 'userId'})
 db.users.belongsTo(db.professors,{foreignKey: 'userId', sourceKey: 'userId'});
 db.users.hasOne(db.students,{foreignKey: 'userId', sourceKey: 'userId'})
@@ -35,4 +36,9 @@ db.users.belongsTo(db.students,{foreignKey: 'userId', sourceKey: 'userId'});
 db.students.hasOne(db.users,{foreignKey: 'userId', sourceKey: 'userId'})
 db.students.belongsTo(db.users,{foreignKey: 'userId', sourceKey: 'userId'});
 
+db.professors.hasMany(db.exams, { foreignKey: 'professor_id' });
+db.exams.belongsTo(db.professors, { foreignKey: 'professor_id' });
+
+db.exams.hasMany(db.appointments, { foreignKey: 'exam_id' });
+db.appointments.belongsTo(db.exams, { foreignKey: 'exam_id' });
 module.exports = db;

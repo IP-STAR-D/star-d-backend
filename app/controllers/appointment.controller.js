@@ -1,6 +1,8 @@
 const db = require("../models");
 const Appointment = db.appointments;
-const Op = db.Sequelize.Op;
+const Student = db.students;
+const Professor = db.professors;
+const Exam = db.exams;
 
 // Create a new Appointment
 exports.create = (req, res) => {
@@ -20,8 +22,34 @@ exports.create = (req, res) => {
 };
 
 // Retrieve all Appointments from the database
-exports.findAll = (req, res) => {
-  Appointment.findAll()
+exports.findAll = async (req, res) => {
+  let conditions = {};
+  if (req.user.role == 'student') {
+    let student = await Student.findByPk(req.user.id);
+
+    conditions = { where: { groupId: student.groupId } }
+  } else {
+    conditions = {
+      attributes: ['*'],
+      include: [
+        {
+          model: Exam,
+          attributes: ['class_name'],
+          required: true,
+          include: [
+            {
+              model: Professor,
+              attributes: [],
+              required: true,
+              where: { user_id: req.user.id },
+            },
+          ],
+        },
+      ],
+      raw:true
+    }
+  }
+  Appointment.findAll(conditions)
     .then((data) => {
       res.send(data);
     })
@@ -44,7 +72,7 @@ exports.findByGroupOrExamId = (req, res) => {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  Appointment.findAll({where})
+  Appointment.findAll({ where })
     .then((data) => {
       if (data && data.length > 0) {
         res.send(data);

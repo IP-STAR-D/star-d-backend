@@ -1,7 +1,7 @@
 module.exports = (sequelize, Sequelize) => {
     const Professor = sequelize.define("professor", {
         
-        UserId: {
+        userId: {
           type: Sequelize.INTEGER,
           primaryKey: true,
           field: "user_id",
@@ -11,14 +11,14 @@ module.exports = (sequelize, Sequelize) => {
             key: "userId",
           },       
         },
-        FacultyId: {
+        facultyId: {
             type: Sequelize.INTEGER,
             foreignKey: true,
             field: "faculty_id",
             allowNull: false,
             references: {
-              model: "faculty",
-              key: "facultyId",
+              model: "faculties",
+              key: "faculty_id",
             },
           }
     });

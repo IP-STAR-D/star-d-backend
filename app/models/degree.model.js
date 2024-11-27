@@ -16,8 +16,8 @@ module.exports = (sequelize, Sequelize) => {
       field: "faculty_id",
       allowNull: false,
       references: {
-        model: "faculty",
-        key: "facultyId",
+        model: "faculties",
+        key: "faculty_id",
       },
     },
   });

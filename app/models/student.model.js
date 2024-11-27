@@ -1,7 +1,7 @@
 module.exports = (sequelize, Sequelize) => {
     const Student = sequelize.define("student", {
         
-        UserId: {
+        userId: {
           type: Sequelize.INTEGER,
           primaryKey: true,
           field: "user_id",
@@ -17,8 +17,8 @@ module.exports = (sequelize, Sequelize) => {
             field: "group_id",
             allowNull: false,
             references: {
-              model: "group",
-              key: "groupId",
+              model: "groups",
+              key: "group_id",
             },
           }
     });

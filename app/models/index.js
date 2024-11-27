@@ -4,7 +4,6 @@ const Sequelize = require("sequelize");
 const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
   host: dbConfig.HOST,
   dialect: dbConfig.dialect,
-  operatorsAliases: false,
   schema: "exam_appointments",
   define: {
     timestamps: false,
@@ -28,5 +27,12 @@ db.students=require("./student.model.js")(sequelize, Sequelize); // db for stude
 db.professors=require("./professor.model.js")(sequelize, Sequelize); // db for professors
 db.appointments=require("./appointment.model.js")(sequelize, Sequelize); // db for appointments
 
+db.users.hasOne(db.professors,{foreignKey: 'userId', sourceKey: 'userId'})
+db.users.belongsTo(db.professors,{foreignKey: 'userId', sourceKey: 'userId'});
+db.users.hasOne(db.students,{foreignKey: 'userId', sourceKey: 'userId'})
+db.users.belongsTo(db.students,{foreignKey: 'userId', sourceKey: 'userId'});
+
+db.students.hasOne(db.users,{foreignKey: 'userId', sourceKey: 'userId'})
+db.students.belongsTo(db.users,{foreignKey: 'userId', sourceKey: 'userId'});
 
 module.exports = db;

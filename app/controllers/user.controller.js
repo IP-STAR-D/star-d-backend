@@ -1,6 +1,5 @@
 const db = require("../models");
 const User = db.users;
-const Op = db.Sequelize.Op;
 
 
 // Retrieve all Users from the database.
@@ -40,10 +39,10 @@ exports.findOne = (req, res) => {
 
 // Update a User by the id in the request
 exports.update = (req, res) => {
-  const user_id = req.params.user_id;
+  const userId = req.params.userId;
 
   User.update(req.body, {
-    where: { user_id }
+    where: { userId }
   })
     .then(result => {
       if (result == 1) {

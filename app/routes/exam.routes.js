@@ -5,7 +5,10 @@ module.exports = (app) => {
   const router = require("express").Router();
 
   // Retrieve all exams
-  router.get("/", exams.findAll);
+  router.get("/all", exams.findAll);
+
+  // Retrieve all exams pertinent to the student
+  router.get("/", authorize, exams.findAllPertinent);
 
   // Retrieve a single exams with id
   router.get("/:id", exams.findOne);

@@ -5,7 +5,27 @@ const Student = db.students;
 const Group = db.groups;
 
 // Retrieve all Exams from the database.
-exports.findAll = async (req, res) => {
+exports.findAll = (req, res) => {
+  Exam.findAll({
+    include: [
+      {
+        model: User,
+        attributes: ["email", "firstName", "lastName"],
+      },
+    ],
+  })
+    .then((data) => {
+      res.send(data);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving Exams.",
+      });
+    });
+};
+
+// Retrieve all exams pertinent to the student
+exports.findAllPertinent = async (req, res) => {
   try {
     const student = await Student.findOne({
       where: { userId: req.user.id },
@@ -22,7 +42,7 @@ exports.findAll = async (req, res) => {
       include: [
         {
           model: User,
-          attributes: ["firstName", "lastName"],
+          attributes: ["email", "firstName", "lastName"],
         },
       ],
     });
@@ -40,7 +60,14 @@ exports.findAll = async (req, res) => {
 exports.findOne = (req, res) => {
   const exam_id = req.params.id;
 
-  Exam.findByPk(exam_id)
+  Exam.findByPk(exam_id, {
+    include: [
+      {
+        model: User,
+        attributes: ["email", "firstName", "lastName"],
+      },
+    ],
+  })
     .then((data) => {
       if (data) {
         res.send(data);
@@ -63,6 +90,12 @@ exports.findByProfessorId = (req, res) => {
 
   Exam.findAll({
     where: { professor_id: professor_id },
+    include: [
+      {
+        model: User,
+        attributes: ["email", "firstName", "lastName"],
+      },
+    ],
   })
     .then((data) => {
       if (data && data.length > 0) {
@@ -86,6 +119,12 @@ exports.findByDegreeId = (req, res) => {
 
   Exam.findAll({
     where: { degree_id: degree_id },
+    include: [
+      {
+        model: User,
+        attributes: ["email", "firstName", "lastName"],
+      },
+    ],
   })
     .then((data) => {
       if (data && data.length > 0) {

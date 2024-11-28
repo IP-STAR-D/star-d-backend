@@ -23,22 +23,28 @@ db.degrees = require("./degree.model.js")(sequelize, Sequelize); // db for degre
 
 db.groups = require("./group.model.js")(sequelize, Sequelize); // db for groups
 db.classrooms = require("./classroom.model.js")(sequelize, Sequelize); // db for classrooms
-db.students=require("./student.model.js")(sequelize, Sequelize); // db for students
-db.professors=require("./professor.model.js")(sequelize, Sequelize); // db for professors
-db.appointments=require("./appointment.model.js")(sequelize, Sequelize); // db for appointments
+db.students = require("./student.model.js")(sequelize, Sequelize); // db for students
+db.professors = require("./professor.model.js")(sequelize, Sequelize); // db for professors
+db.appointments = require("./appointment.model.js")(sequelize, Sequelize); // db for appointments
 
 //relations
-db.users.hasOne(db.professors,{foreignKey: 'userId', sourceKey: 'userId'})
-db.users.belongsTo(db.professors,{foreignKey: 'userId', sourceKey: 'userId'});
-db.users.hasOne(db.students,{foreignKey: 'userId', sourceKey: 'userId'})
-db.users.belongsTo(db.students,{foreignKey: 'userId', sourceKey: 'userId'});
+db.users.hasOne(db.professors, { foreignKey: "userId", sourceKey: "userId" });
+db.users.belongsTo(db.professors, { foreignKey: "userId", sourceKey: "userId" });
+db.users.hasOne(db.students, { foreignKey: "userId", sourceKey: "userId" });
+db.users.belongsTo(db.students, { foreignKey: "userId", sourceKey: "userId" });
 
-db.students.hasOne(db.users,{foreignKey: 'userId', sourceKey: 'userId'})
-db.students.belongsTo(db.users,{foreignKey: 'userId', sourceKey: 'userId'});
+db.students.hasOne(db.users, { foreignKey: "userId", sourceKey: "userId" });
+db.students.belongsTo(db.users, { foreignKey: "userId", sourceKey: "userId" });
 
-db.professors.hasMany(db.exams, { foreignKey: 'professor_id' });
-db.exams.belongsTo(db.professors, { foreignKey: 'professor_id' });
+db.professors.hasMany(db.exams, { foreignKey: "professor_id" });
+db.exams.belongsTo(db.professors, { foreignKey: "professor_id" });
 
-db.exams.hasMany(db.appointments, { foreignKey: 'exam_id' });
-db.appointments.belongsTo(db.exams, { foreignKey: 'exam_id' });
+db.exams.hasMany(db.appointments, { foreignKey: "exam_id" });
+db.appointments.belongsTo(db.exams, { foreignKey: "exam_id" });
+
+db.groups.hasMany(db.students, { foreignKey: "groupId" });
+db.students.belongsTo(db.groups, { foreignKey: "groupId" });
+
+db.exams.belongsTo(db.users, { foreignKey: "professor_id" });
+db.users.hasOne(db.exams, { foreignKey: "professor_id" });
 module.exports = db;

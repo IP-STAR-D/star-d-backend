@@ -1,18 +1,39 @@
 const db = require("../models");
 const Exam = db.exams;
-const Op = db.Sequelize.Op;
+const User = db.users;
+const Student = db.students;
+const Group = db.groups;
 
 // Retrieve all Exams from the database.
-exports.findAll = (req, res) => {
-  Exam.findAll()
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || "Some error occurred while retrieving Exams.",
-      });
+exports.findAll = async (req, res) => {
+  try {
+    const student = await Student.findOne({
+      where: { userId: req.user.id },
+      include: [
+        {
+          model: Group,
+          attributes: ["degreeId", "year"],
+        },
+      ],
     });
+
+    const exams = await Exam.findAll({
+      where: { degreeId: student.group.degreeId, year: student.group.year },
+      include: [
+        {
+          model: User,
+          attributes: ["firstName", "lastName"],
+        },
+      ],
+    });
+
+    res.send(exams);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: err.message || "Some error occurred while retrieving exams.",
+    });
+  }
 };
 
 // Find a single Exam with an id
@@ -41,7 +62,7 @@ exports.findByProfessorId = (req, res) => {
   const professor_id = req.params.professor_id;
 
   Exam.findAll({
-    where: {professor_id: professor_id}
+    where: { professor_id: professor_id },
   })
     .then((data) => {
       if (data && data.length > 0) {
@@ -64,7 +85,7 @@ exports.findByDegreeId = (req, res) => {
   const degree_id = req.params.degree_id;
 
   Exam.findAll({
-    where: {degree_id: degree_id}
+    where: { degree_id: degree_id },
   })
     .then((data) => {
       if (data && data.length > 0) {

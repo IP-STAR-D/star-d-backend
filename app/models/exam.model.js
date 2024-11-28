@@ -36,6 +36,11 @@ module.exports = (sequelize, Sequelize) => {
       field: "semester",
       allowNull: false,
     },
+    year: {
+      type: Sequelize.INTEGER,
+      field: "year",
+      allowNull: false,
+    },
   });
 
   return Exam;

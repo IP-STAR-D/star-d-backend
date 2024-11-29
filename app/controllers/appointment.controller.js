@@ -3,6 +3,7 @@ const Appointment = db.appointments;
 const Student = db.students;
 const Professor = db.professors;
 const Exam = db.exams;
+const Op = db.Sequelize.Op;
 
 // Create a new Appointment
 exports.create = (req, res) => {
@@ -24,17 +25,17 @@ exports.create = (req, res) => {
 // Retrieve all Appointments from the database
 exports.findAll = async (req, res) => {
   let conditions = {};
-  if (req.user.role == 'student') {
+  if (req.user.role == "student") {
     let student = await Student.findByPk(req.user.id);
 
-    conditions = { where: { groupId: student.groupId } }
+    conditions = { where: { groupId: student.groupId } };
   } else {
     conditions = {
-      attributes: ['*'],
+      attributes: ["*"],
       include: [
         {
           model: Exam,
-          attributes: ['class_name'],
+          attributes: ["class_name"],
           required: true,
           include: [
             {
@@ -46,8 +47,8 @@ exports.findAll = async (req, res) => {
           ],
         },
       ],
-      raw:true
-    }
+      raw: true,
+    };
   }
   Appointment.findAll(conditions)
     .then((data) => {
@@ -55,11 +56,63 @@ exports.findAll = async (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving Appointments.",
+        message: err.message || "Some error occurred while retrieving Appointments.",
       });
     });
 };
+
+// Find appointments by professorId, classroomId, day
+exports.findFiltered = (req, res) => {
+  const { professorId, classroomId, day } = req.query;
+
+  if (!professorId && !classroomId && !day) {
+    return res.status(400).json({ message: "At least one filter is required." });
+  }
+
+  let conditions = { where: {} };
+
+  if (classroomId) {
+    conditions.where.classroomId = classroomId;
+  }
+
+  if (professorId) {
+    conditions.include = [
+      {
+        model: Exam,
+        required: true,
+        where: { professorId: professorId },
+      },
+    ];
+  }
+
+  if (day) {
+    const startOfDay = new Date(day);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(day);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    conditions.where.startTime = {
+      [Op.between]: [startOfDay, endOfDay],
+    };
+  }
+
+  Appointment.findAll(conditions)
+    .then((data) => {
+      console.log(data);
+      if (data && data.length > 0) {
+        res.send(data);
+      } else {
+        res.status(404).send({ message: "No appointments found for the provided criteria." });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Error retrieving appointments.",
+        error: err.message,
+      });
+    });
+};
+
 // Find all appointments by a groupId or examId
 exports.findByGroupOrExamId = (req, res) => {
   const { examId, groupId } = req.params;
@@ -67,7 +120,7 @@ exports.findByGroupOrExamId = (req, res) => {
   if (examId) {
     where = { examId };
   } else if (groupId) {
-    where = { groupId }
+    where = { groupId };
   } else {
     return res.status(400).json({ message: "All fields are required" });
   }
@@ -109,7 +162,6 @@ exports.findOne = (req, res) => {
       });
     });
 };
-
 
 // Update a Appointment by the id in the request
 exports.update = (req, res) => {

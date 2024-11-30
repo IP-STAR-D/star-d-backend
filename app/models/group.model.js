@@ -6,6 +6,11 @@ module.exports = (sequelize, Sequelize) => {
       primaryKey: true,
       field: "group_id",
     },
+    groupName: {
+      type: Sequelize.STRING,
+      field: "group_name",
+      allowNull: false,
+    },
     degreeId: {
       type: Sequelize.INTEGER,
       foreignKey: true,

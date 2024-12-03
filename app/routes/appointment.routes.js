@@ -8,7 +8,7 @@ module.exports = (app) => {
   router.get("/", appointments.findAll);
 
   // Retrieve appointments by professorId, classroomId, day
-  router.get("/filter", authorize, appointments.findFiltered);
+  router.get("/filter", appointments.findFiltered);
 
   // Retrieve a single appointment with id
   router.get("/:id", appointments.findOne);

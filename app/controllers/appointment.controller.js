@@ -3,11 +3,28 @@ const Appointment = db.appointments;
 const Student = db.students;
 const Professor = db.professors;
 const Exam = db.exams;
+const Group = db.groups;
 const Op = db.Sequelize.Op;
 
+const checkIfBoss = async (studentId) => {
+  let student = await Student.findByPk(studentId, {
+    include: [
+      {
+        model: Group,
+        attributes: ["bossId"],
+      },
+    ],
+  });
+  return studentId === student.group.bossId;
+}
+
 // Create a new Appointment
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
   const { examId, groupId, classroomId, status, startTime, endTime } = req.body;
+  const studentIsBoss = await checkIfBoss(req.user.id);
+  if (req.user.role == "student" && !studentIsBoss) {
+    return res.status(400).json({ message: "Student is not the leader of the group!" });
+  }
 
   if (!examId || !groupId || !classroomId || !startTime || !status || !endTime) {
     return res.status(400).json({ message: "All fields are required" });

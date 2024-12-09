@@ -16,7 +16,7 @@ const checkIfBoss = async (studentId) => {
     ],
   });
   return studentId === student.group.bossId;
-}
+};
 
 // Create a new Appointment
 exports.create = async (req, res) => {
@@ -78,56 +78,112 @@ exports.findAll = async (req, res) => {
     });
 };
 
-// Find appointments by professorId, classroomId, day
-exports.findFiltered = (req, res) => {
-  const { professorId, classroomId, day } = req.query;
+// Find appointments by professorId, classroomId, groupId and day
+exports.findFiltered = async (req, res) => {
+  const { professorId, classroomId, groupId: queryGroupId, day } = req.query;
 
-  if (!professorId && !classroomId && !day) {
-    return res.status(400).json({ message: "At least one filter is required." });
+  let groupId = queryGroupId;
+  if (!groupId && req.user.role === "student") {
+    try {
+      const student = await Student.findByPk(req.user.id);
+      groupId = student?.groupId;
+    } catch (error) {
+      return res.status(500).json({ message: "Error retrieving student group.", error: error.message });
+    }
   }
 
-  let conditions = { where: {} };
-
-  if (classroomId) {
-    conditions.where.classroomId = classroomId;
-  }
-
-  if (professorId) {
-    conditions.include = [
-      {
-        model: Exam,
-        required: true,
-        where: { professorId: professorId },
-      },
-    ];
-  }
-
-  if (day) {
+  try {
     const startOfDay = new Date(day);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(day);
     endOfDay.setHours(23, 59, 59, 999);
 
-    conditions.where.startTime = {
-      [Op.between]: [startOfDay, endOfDay],
-    };
-  }
+    // Fetch appointments by professorId and day
+    const professorAppointments = professorId
+      ? await Appointment.findAll({
+          where: {
+            startTime: { [Op.between]: [startOfDay, endOfDay] },
+          },
+          include: [
+            {
+              model: Exam,
+              required: true,
+              where: { professorId: professorId },
+            },
+          ],
+        })
+      : [];
 
-  Appointment.findAll(conditions)
-    .then((data) => {
-      console.log(data);
-      if (data && data.length > 0) {
-        res.send(data);
-      } else {
-        res.status(404).send({ message: "No appointments found for the provided criteria." });
-      }
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: "Error retrieving appointments.",
-        error: err.message,
+    // Fetch appointments by classroomId and day
+    const classroomAppointments = classroomId
+      ? await Appointment.findAll({
+          where: {
+            startTime: { [Op.between]: [startOfDay, endOfDay] },
+            classroomId: classroomId,
+          },
+          include: [
+            {
+              model: Exam,
+              required: true,
+            },
+          ],
+        })
+      : [];
+
+    // Fetch appointments by groupId and day
+    const groupAppointments = groupId
+      ? await Appointment.findAll({
+          where: {
+            startTime: { [Op.between]: [startOfDay, endOfDay] },
+            groupId: groupId,
+          },
+          include: [
+            {
+              model: Exam,
+              required: true,
+            },
+          ],
+        })
+      : [];
+
+    // Combine results
+    const combinedAppointments = [...professorAppointments, ...classroomAppointments, ...groupAppointments];
+
+    // Remove duplicates based on ID
+    const uniqueAppointments = Array.from(
+      new Map(combinedAppointments.map((appt) => [appt.appointmentId, appt])).values()
+    );
+
+    if (uniqueAppointments.length > 0) {
+      const matches = uniqueAppointments.map((appointment) => {
+        const criteria = [];
+        if (professorAppointments.some((appt) => appt.appointmentId === appointment.appointmentId)) {
+          criteria.push("professor");
+        }
+        if (classroomAppointments.some((appt) => appt.appointmentId === appointment.appointmentId)) {
+          criteria.push("classroom");
+        }
+        if (groupAppointments.some((appt) => appt.appointmentId === appointment.appointmentId)) {
+          criteria.push("group");
+        }
+        return {
+          id: appointment.appointmentId,
+          matches: criteria,
+        };
       });
+      res.send({
+        appointments: uniqueAppointments,
+        matches: matches,
+      });
+    } else {
+      res.status(404).send({ message: "No appointments found for the provided criteria." });
+    }
+  } catch (err) {
+    res.status(500).send({
+      message: "Error retrieving appointments.",
+      error: err.message,
     });
+  }
 };
 
 // Find all appointments by a groupId or examId

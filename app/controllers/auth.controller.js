@@ -6,7 +6,13 @@ const Professor = db.professors;
 const Student = db.students;
 
 const generateToken = (user) => {
-    return jwt.sign({ id: user.userId, isAdmin: user.isAdmin, role: user.professor ? 'professor' : 'student' }, process.env.JWT_SECRET, { expiresIn: '12h' });
+    let role = 'student';
+    if(user.isAdmin) {
+        role = 'admin';
+    } else if(user.professor) {
+        role = 'professor';
+    }
+    return jwt.sign({ id: user.userId, role: role }, process.env.JWT_SECRET, { expiresIn: '12h' });
 };
 const matchPassword = async function (enteredPassword, password) {
     return await bcrypt.compare(enteredPassword, password);

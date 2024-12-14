@@ -41,6 +41,17 @@ module.exports = (sequelize, Sequelize) => {
       field: "year",
       allowNull: false,
     },
+    type: {
+      type: Sequelize.STRING,
+      field: "type",
+      allowNull: false,
+      validate: {
+        isIn: {
+          args: [["exam", "colloquy"]],
+          msg: "Type must be exam or colloquy",
+        },
+      },
+    },
   });
 
   return Exam;

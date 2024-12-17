@@ -7,6 +7,7 @@ const app = express();
 
 app.use(cors());
 
+
 const corsOptions = {
   origin: ["http://localhost:4200", "https://star-d-frontend.netlify.app"],
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",

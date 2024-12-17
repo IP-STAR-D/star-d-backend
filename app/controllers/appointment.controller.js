@@ -5,6 +5,7 @@ const Professor = db.professors;
 const Exam = db.exams;
 const Group = db.groups;
 const Op = db.Sequelize.Op;
+const sendEmail = require('../utils/email');
 
 const checkIfBoss = async (studentId) => {
   let student = await Student.findByPk(studentId, {
@@ -245,6 +246,10 @@ exports.update = (req, res) => {
   })
     .then((result) => {
       if (result == 1) {
+        // sendEmail({to:'luculescur@gmail.com',
+        //   subject:'Updated succesfully',
+        //   text:'Updated'
+        // })
         res.send({
           message: "Appointment was updated successfully.",
         });

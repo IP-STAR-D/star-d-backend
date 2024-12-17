@@ -19,6 +19,9 @@ DB_PASSWORD=
 DB_USER=
 DB_NAME=postgres
 DB_PORT=6543
+
+EMAIL_USER=
+EMAIL_PASSWORD=
 ```
 - Build and run the project
 ```

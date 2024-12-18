@@ -1,5 +1,6 @@
 module.exports = (app) => {
   const degrees = require("../controllers/degree.controller.js");
+  const { authorize } = require("../middlewares/auth.js");
 
   const router = require("express").Router();
 
@@ -21,5 +22,5 @@ module.exports = (app) => {
   // Delete a degree with id
   router.delete("/:id", degrees.delete);
 
-  app.use("/degrees", router);
+  app.use("/degrees", authorize, router);
 };

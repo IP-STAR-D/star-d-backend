@@ -16,6 +16,9 @@ module.exports = app => {
     // Retrieve a single group by bossId
     router.get("/bossId/:boss_id", groups.findByBossId);
 
+    // Retrieve all the groups with a professor_id
+    router.get("/professor/:professor_id", groups.findByProfessorId);
+
     // Retrieve all the groups by a year
     router.get("/year/:year", groups.findByYear);
 

@@ -1,5 +1,6 @@
 module.exports = app => {
     const professors = require("../controllers/professor.controller.js");
+    const { authorize } = require("../middlewares/auth.js");
   
     const router = require("express").Router();
   
@@ -12,9 +13,5 @@ module.exports = app => {
     // Retrieve all the professors with a faculty_id
     router.get("/faculty/:faculty_id", professors.findByFacultyId);
 
-    app.use('/professors', router);
+    app.use('/professors', authorize, router);
   };
-
-
-
-

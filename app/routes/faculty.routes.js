@@ -1,5 +1,6 @@
 module.exports = (app) => {
   const faculties = require("../controllers/faculty.controller.js");
+  const { authorize } = require("../middlewares/auth.js");
 
   const router = require("express").Router();
 
@@ -18,5 +19,5 @@ module.exports = (app) => {
   // Delete a Faculty with id
   router.delete("/:id", faculties.delete);
 
-  app.use("/faculties", router);
+  app.use("/faculties", authorize, router);
 };

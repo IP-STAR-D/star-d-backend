@@ -1,5 +1,6 @@
 module.exports = app => {
     const groups = require("../controllers/group.controller.js");
+    const { authorize } = require("../middlewares/auth.js");
   
     const router = require("express").Router();
   
@@ -18,5 +19,5 @@ module.exports = app => {
     // Retrieve all the groups by a year
     router.get("/year/:year", groups.findByYear);
 
-    app.use('/groups', router);
+    app.use('/groups', authorize, router);
   };

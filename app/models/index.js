@@ -47,4 +47,11 @@ db.students.belongsTo(db.groups, { foreignKey: "groupId" });
 
 db.exams.belongsTo(db.users, { foreignKey: "professor_id" });
 db.users.hasOne(db.exams, { foreignKey: "professor_id" });
+
+db.degrees.hasMany(db.groups, { foreignKey: "degree_id" });
+db.groups.belongsTo(db.degrees, { foreignKey: "degree_id" });
+
+db.degrees.hasMany(db.exams, { foreignKey: "degree_id" });
+db.exams.belongsTo(db.degrees, { foreignKey: "degree_id" });
+
 module.exports = db;

@@ -1,5 +1,7 @@
 const db = require("../models");
 const Group = db.groups;
+const Exam = db.exams;
+const Degree = db.degrees;
 const Op = db.Sequelize.Op;
 
 // Retrieve all Groups from the database.
@@ -77,6 +79,47 @@ exports.findByBossId = (req, res) => {
     .catch((err) => {
       res.status(500).send({
         message: "Error retrieving Group with boss_id=" + boss_id,
+      });
+    });
+};
+
+// Find groups by professor_id
+exports.findByProfessorId = (req, res) => {
+  const professorId = req.params.professor_id;
+
+  Group.findAll({
+    attributes: ["groupId", "groupName", "degreeId", "bossId", "year"],
+    include: [
+      {
+        model: Degree,
+        as: "degree",
+        attributes: [],
+        required: false,
+        include: [
+          {
+            model: Exam,
+            as: "exams",
+            attributes: [],
+            where: { professorId },
+            required: false,
+          },
+        ],
+      },
+    ],
+  })
+    .then((data) => {
+      if (data && data.length > 0) {
+        res.send(data);
+      } else {
+        res.status(404).send({
+          message: `Cannot find groups with professor_id=${professor_id}.`,
+        });
+      }
+    })
+    .catch((err) => {
+      console.log(err)
+      res.status(500).send({
+        message: "Error retrieving groups with professor_id=" + professor_id,
       });
     });
 };

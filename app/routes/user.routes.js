@@ -1,5 +1,6 @@
 module.exports = app => {
     const users = require("../controllers/user.controller.js");
+    const { authorize } = require("../middlewares/auth.js");
   
     const router = require("express").Router();
   
@@ -12,5 +13,5 @@ module.exports = app => {
     // Update a user with id
     router.put("/:id", users.update);
   
-    app.use('/users', router);
+    app.use('/users', authorize, router);
   };

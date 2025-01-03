@@ -20,6 +20,11 @@ module.exports = (sequelize, Sequelize) => {
         key: "faculty_id",
       },
     },
+    shortName: {
+      type: Sequelize.STRING,
+      field: "short_name",
+      allowNull: false,
+    },
   });
 
   return Degree;

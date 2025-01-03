@@ -11,6 +11,11 @@ module.exports = (sequelize, Sequelize) => {
       field: "faculty_name",
       allowNull: false,
     },
+    shortName: {
+      type: Sequelize.STRING,
+      field: "short_name",
+      allowNull: false,
+    },
   });
 
   return Faculty;

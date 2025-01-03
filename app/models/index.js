@@ -30,6 +30,7 @@ db.semesters = require("./semester.model.js")(sequelize, Sequelize); // db for s
 //relations
 db.users.hasOne(db.professors, { foreignKey: "userId", sourceKey: "userId" });
 db.users.belongsTo(db.professors, { foreignKey: "userId", sourceKey: "userId" });
+
 db.users.hasOne(db.students, { foreignKey: "userId", sourceKey: "userId" });
 db.users.belongsTo(db.students, { foreignKey: "userId", sourceKey: "userId" });
 
@@ -53,5 +54,10 @@ db.groups.belongsTo(db.degrees, { foreignKey: "degree_id" });
 
 db.degrees.hasMany(db.exams, { foreignKey: "degree_id" });
 db.exams.belongsTo(db.degrees, { foreignKey: "degree_id" });
+
+db.degrees.belongsTo(db.faculties, { foreignKey: "facultyId" });
+
+db.professors.belongsTo(db.users, { foreignKey: "userId" });
+db.professors.belongsTo(db.faculties, { foreignKey: "facultyId" });
 
 module.exports = db;

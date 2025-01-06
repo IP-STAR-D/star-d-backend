@@ -1,11 +1,12 @@
 const db = require("../models");
 const Appointment = db.appointments;
+const User = db.users;
 const Student = db.students;
 const Professor = db.professors;
 const Exam = db.exams;
 const Group = db.groups;
 const Op = db.Sequelize.Op;
-const sendEmail = require('../utils/email');
+const sendEmail = require("../utils/email");
 
 const checkIfBoss = async (studentId) => {
   let student = await Student.findByPk(studentId, {
@@ -24,18 +25,35 @@ exports.create = async (req, res) => {
   const { examId, groupId, classroomId, status, startTime, endTime } = req.body;
   const studentIsBoss = await checkIfBoss(req.user.id);
   if (req.user.role == "student" && !studentIsBoss) {
-    return res.status(400).json({ message: "Student is not the leader of the group!" });
+    return res
+      .status(400)
+      .json({ message: "Student is not the leader of the group!" });
   }
 
-  if (!examId || !groupId || !classroomId || !startTime || !status || !endTime) {
+  if (
+    !examId ||
+    !groupId ||
+    !classroomId ||
+    !startTime ||
+    !status ||
+    !endTime
+  ) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  Appointment.create({ examId, groupId, classroomId, status, startTime, endTime })
+  Appointment.create({
+    examId,
+    groupId,
+    classroomId,
+    status,
+    startTime,
+    endTime,
+  })
     .then((data) => res.status(201).json(data))
     .catch((err) => {
       res.status(500).json({
-        message: err.message || "An error occurred while creating the appointment.",
+        message:
+          err.message || "An error occurred while creating the appointment.",
       });
     });
 };
@@ -74,7 +92,8 @@ exports.findAll = async (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({
-        message: err.message || "Some error occurred while retrieving Appointments.",
+        message:
+          err.message || "Some error occurred while retrieving Appointments.",
       });
     });
 };
@@ -89,7 +108,10 @@ exports.findFiltered = async (req, res) => {
       const student = await Student.findByPk(req.user.id);
       groupId = student?.groupId;
     } catch (error) {
-      return res.status(500).json({ message: "Error retrieving student group.", error: error.message });
+      return res.status(500).json({
+        message: "Error retrieving student group.",
+        error: error.message,
+      });
     }
   }
 
@@ -148,23 +170,41 @@ exports.findFiltered = async (req, res) => {
       : [];
 
     // Combine results
-    const combinedAppointments = [...professorAppointments, ...classroomAppointments, ...groupAppointments];
+    const combinedAppointments = [
+      ...professorAppointments,
+      ...classroomAppointments,
+      ...groupAppointments,
+    ];
 
     // Remove duplicates based on ID
     const uniqueAppointments = Array.from(
-      new Map(combinedAppointments.map((appt) => [appt.appointmentId, appt])).values()
+      new Map(
+        combinedAppointments.map((appt) => [appt.appointmentId, appt])
+      ).values()
     );
 
     if (uniqueAppointments.length > 0) {
       const matches = uniqueAppointments.map((appointment) => {
         const criteria = [];
-        if (professorAppointments.some((appt) => appt.appointmentId === appointment.appointmentId)) {
+        if (
+          professorAppointments.some(
+            (appt) => appt.appointmentId === appointment.appointmentId
+          )
+        ) {
           criteria.push("professor");
         }
-        if (classroomAppointments.some((appt) => appt.appointmentId === appointment.appointmentId)) {
+        if (
+          classroomAppointments.some(
+            (appt) => appt.appointmentId === appointment.appointmentId
+          )
+        ) {
           criteria.push("classroom");
         }
-        if (groupAppointments.some((appt) => appt.appointmentId === appointment.appointmentId)) {
+        if (
+          groupAppointments.some(
+            (appt) => appt.appointmentId === appointment.appointmentId
+          )
+        ) {
           criteria.push("group");
         }
         return {
@@ -177,7 +217,9 @@ exports.findFiltered = async (req, res) => {
         matches: matches,
       });
     } else {
-      res.status(404).send({ message: "No appointments found for the provided criteria." });
+      res
+        .status(404)
+        .send({ message: "No appointments found for the provided criteria." });
     }
   } catch (err) {
     res.status(500).send({
@@ -238,21 +280,54 @@ exports.findOne = (req, res) => {
 };
 
 // Update a Appointment by the id in the request
-exports.update = (req, res) => {
+exports.update = async (req, res) => {
   const appointment_id = req.params.id;
+  const app = req.body;
+
+  let bossUser = "";
+
+  try {
+    const bossStudent = await Student.findOne(
+      { where: { groupId: app.groupId } }
+    );
+
+    bossUser = await User.findByPk(bossStudent.userId, {
+      attributes: ["email"],
+    });
+  } catch (err) {
+    console.log(err);
+  }
 
   Appointment.update(req.body, {
     where: { appointmentId: appointment_id },
   })
     .then((result) => {
       if (result == 1) {
-        // sendEmail({to:'luculescur@gmail.com',
-        //   subject:'Updated succesfully',
-        //   text:'Updated'
-        // })
         res.send({
           message: "Appointment was updated successfully.",
         });
+
+        try {
+          const emailTemplate = `
+            Buna ziua,
+
+            Programarea dumneavoastra a fost modificata. Iata detaliile actualizate:
+
+            - ID Programare: ${appointment_id}
+            - Status: ${app.status || "Nespecificat"}
+            - Ora: ${app.start_time || "Nespecificat"}
+
+            Toate cele bune!
+          `;
+
+          sendEmail({
+            to: bossUser.email,
+            subject: "Programare Modificata",
+            text: emailTemplate,
+          });
+        } catch (err) {
+          console.log(err);
+        }
       } else {
         res.status(400).send({
           message: `Cannot update Appointment with id=${appointment_id}. Maybe Appointment was not found or req.body is empty!`,
@@ -267,8 +342,23 @@ exports.update = (req, res) => {
 };
 
 // Delete a Appointment by the id in the request
-exports.delete = (req, res) => {
+exports.delete = async (req, res) => {
   const appointment_id = req.params.id;
+  const app = req.body;
+
+  let bossUser = "";
+
+  try {
+    const bossStudent = await Student.findOne(
+      { where: { groupId: app.groupId } }
+    );
+
+    bossUser = await User.findByPk(bossStudent.userId, {
+      attributes: ["email"],
+    });
+  } catch (err) {
+    console.log(err);
+  }
 
   Appointment.destroy({ where: { appointmentId: appointment_id } })
     .then((result) => {
@@ -276,6 +366,28 @@ exports.delete = (req, res) => {
         res.send({
           message: "Appointment was deleted successfully.",
         });
+
+        try {
+          const emailTemplate = `
+            Buna ziua,
+
+            Programarea dumneavoastra a fost stearsa. Cu urmatoarele informatii:
+
+            - ID Programare: ${appointment_id}
+            - Status: ${app.status || "Nespecificat"}
+            - Ora: ${app.start_time || "Nespecificat"}
+
+            Toate cele bune!
+          `;
+
+          sendEmail({
+            to: bossUser.email,
+            subject: "Programare Stearsa",
+            text: emailTemplate,
+          });
+        } catch (err) {
+          console.log(err);
+        }
       } else {
         res.status(404).send({
           message: `Cannot find Appointment with id=${appointment_id}.`,

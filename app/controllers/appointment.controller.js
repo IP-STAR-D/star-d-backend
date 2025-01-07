@@ -82,7 +82,7 @@ exports.create = async (req, res) => {
 
       - ID Programare: ${appointment.appointmentId}
       - Examen: ${exam.class_name} (${exam.shortName})
-      - Grup: ${groupId}
+      - Grupa: ${groupId}
       - Ora începerii: ${startTime}
       - Ora finalizării: ${endTime}
 

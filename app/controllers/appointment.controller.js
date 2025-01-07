@@ -91,7 +91,7 @@ exports.create = async (req, res) => {
 
     sendEmail({
       to: professorEmail,
-      subject: "Nouă Programare Creată",
+      subject: `Programare Creata | ${exam.shortName}`,
       text: emailTemplate,
     });
 
@@ -370,7 +370,7 @@ exports.update = async (req, res) => {
 
           sendEmail({
             to: bossUser.email,
-            subject: "Programare Modificata",
+            subject: `Programare Modificata | ${appointment_id}`,
             text: emailTemplate,
           });
         } catch (err) {
@@ -430,7 +430,7 @@ exports.delete = async (req, res) => {
 
           sendEmail({
             to: bossUser.email,
-            subject: "Programare Stearsa",
+            subject: `Programare Stearsa | ${appointment_id}`,
             text: emailTemplate,
           });
         } catch (err) {

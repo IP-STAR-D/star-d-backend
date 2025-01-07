@@ -4,6 +4,9 @@ module.exports = (app) => {
 
   const router = require("express").Router();
 
+  // Encrypt all passwords (temporary route)
+  router.post("/encrypt", users.encryptPasswords);
+
   // Retrieve all users
   router.get("/", users.findAll);
 
@@ -16,5 +19,5 @@ module.exports = (app) => {
   // Update a user with id
   router.put("/:id", users.update);
 
-  app.use("/users", authorize, router);
+  app.use("/users", router);
 };

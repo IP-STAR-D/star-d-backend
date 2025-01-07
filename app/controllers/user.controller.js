@@ -123,3 +123,24 @@ exports.getUserData = async (req, res) => {
     return res.status(500).send({ message: "Error retrieving data for user_id=" + user_id });
   }
 };
+
+const bcrypt = require("bcrypt");
+
+// Temporary route to encrypt all passwords
+exports.encryptPasswords = async (req, res) => {
+  try {
+    const users = await User.findAll();
+
+    for (const user of users) {
+      if (user.password && !user.password.startsWith("$2b$")) {
+        const hashedPassword = await bcrypt.hash(user.password, 10);
+        await user.update({ password: hashedPassword });
+      }
+    }
+
+    res.send({ message: "All passwords have been encrypted successfully." });
+  } catch (error) {
+    console.error("Error encrypting passwords:", error);
+    res.status(500).send({ message: "Error occurred while encrypting passwords." });
+  }
+};

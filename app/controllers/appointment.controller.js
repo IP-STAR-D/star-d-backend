@@ -41,21 +41,69 @@ exports.create = async (req, res) => {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  Appointment.create({
-    examId,
-    groupId,
-    classroomId,
-    status,
-    startTime,
-    endTime,
-  })
-    .then((data) => res.status(201).json(data))
-    .catch((err) => {
-      res.status(500).json({
-        message:
-          err.message || "An error occurred while creating the appointment.",
-      });
+  try {
+    // Găsim profesorul asociat examenului
+    const exam = await Exam.findByPk(examId, {
+      include: [
+        {
+          model: Professor,
+          as: "professor",
+          include: [{ model: User, as: "user", attributes: ["email"] }],
+        },
+      ],
     });
+
+    if (!exam) {
+      return res.status(404).json({ message: "Exam not found" });
+    }
+
+    const professorEmail = exam.professor?.user?.email;
+    if (!professorEmail) {
+      return res
+        .status(404)
+        .json({ message: "Associated professor not found or has no email" });
+    }
+
+    // Creăm programarea
+    const appointment = await Appointment.create({
+      examId,
+      groupId,
+      classroomId,
+      status,
+      startTime,
+      endTime,
+    });
+
+    // Trimitem e-mail profesorului
+    const emailTemplate = `
+      Buna ziua,
+
+      O nouă programare a fost creată:
+
+      - ID Programare: ${appointment.appointmentId}
+      - Examen: ${exam.class_name} (${exam.shortName})
+      - Grup: ${groupId}
+      - Ora începerii: ${startTime}
+      - Ora finalizării: ${endTime}
+
+      Toate cele bune!
+    `;
+
+    sendEmail({
+      to: professorEmail,
+      subject: "Nouă Programare Creată",
+      text: emailTemplate,
+    });
+
+    // Returnăm răspunsul
+    res.status(201).json(appointment);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message:
+        err.message || "An error occurred while creating the appointment.",
+    });
+  }
 };
 
 // Retrieve all Appointments from the database
@@ -287,9 +335,9 @@ exports.update = async (req, res) => {
   let bossUser = "";
 
   try {
-    const bossStudent = await Student.findOne(
-      { where: { groupId: app.groupId } }
-    );
+    const bossStudent = await Student.findOne({
+      where: { groupId: app.groupId },
+    });
 
     bossUser = await User.findByPk(bossStudent.userId, {
       attributes: ["email"],
@@ -349,9 +397,9 @@ exports.delete = async (req, res) => {
   let bossUser = "";
 
   try {
-    const bossStudent = await Student.findOne(
-      { where: { groupId: app.groupId } }
-    );
+    const bossStudent = await Student.findOne({
+      where: { groupId: app.groupId },
+    });
 
     bossUser = await User.findByPk(bossStudent.userId, {
       attributes: ["email"],

@@ -47,6 +47,7 @@ require("./app/routes/professor.routes")(app); // routing for professors
 require("./app/routes/appointment.routes")(app); // routing for appointment
 require("./app/routes/semester.routes")(app); // routing for semesters
 require("./app/routes/auth.routes")(app); // routing for auth
+require("./app/routes/app-settings.routes")(app); // routing for settings
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;

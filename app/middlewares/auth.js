@@ -19,3 +19,12 @@ exports.authorize = (req, res, next) => {
         res.status(401).json({ message: 'Not authorized, no token' });
     }
 };
+
+exports.checkAdmin = (req, res, next) => {
+    const role = req.user.role;
+    if (role === 'admin') {
+        next()
+    } else {
+        res.status(403).json({ message: 'Not authorized!' });
+    }
+};

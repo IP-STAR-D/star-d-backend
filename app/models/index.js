@@ -26,6 +26,7 @@ db.students = require("./student.model.js")(sequelize, Sequelize); // db for stu
 db.professors = require("./professor.model.js")(sequelize, Sequelize); // db for professors
 db.appointments = require("./appointment.model.js")(sequelize, Sequelize); // db for appointments
 db.semesters = require("./semester.model.js")(sequelize, Sequelize); // db for semesters
+db.appSettings = require("./app-settings.model.js")(sequelize, Sequelize); // db for app settings
 
 //relations
 db.users.hasOne(db.professors, { foreignKey: "userId", sourceKey: "userId" });

@@ -5,6 +5,7 @@ const Student = db.students;
 const Professor = db.professors;
 const Exam = db.exams;
 const Group = db.groups;
+const AppSettings = db.appSettings;
 const Op = db.Sequelize.Op;
 const sendEmail = require("../utils/email");
 
@@ -18,6 +19,11 @@ const checkIfBoss = async (studentId) => {
     ],
   });
   return studentId === student.group.bossId;
+};
+
+const sendEmails = async () => {
+  let setting = await AppSettings.findOne({ name: 'sendEmails' });
+  return setting.value;
 };
 
 // Create a new Appointment
@@ -74,8 +80,9 @@ exports.create = async (req, res) => {
       endTime,
     });
 
-    // Trimitem e-mail profesorului
-    const emailTemplate = `
+    if (await sendEmails()) {
+      // Trimitem e-mail profesorului
+      const emailTemplate = `
       Buna ziua,
 
       O nouă programare a fost creată:
@@ -89,12 +96,12 @@ exports.create = async (req, res) => {
       Toate cele bune!
     `;
 
-    sendEmail({
-      to: professorEmail,
-      subject: `Programare Creata | ${exam.shortName}`,
-      text: emailTemplate,
-    });
-
+      sendEmail({
+        to: professorEmail,
+        subject: `Programare Creata | ${exam.shortName}`,
+        text: emailTemplate,
+      });
+    }
     // Returnăm răspunsul
     res.status(201).json(appointment);
   } catch (err) {
@@ -172,49 +179,49 @@ exports.findFiltered = async (req, res) => {
     // Fetch appointments by professorId and day
     const professorAppointments = professorId
       ? await Appointment.findAll({
-          where: {
-            startTime: { [Op.between]: [startOfDay, endOfDay] },
+        where: {
+          startTime: { [Op.between]: [startOfDay, endOfDay] },
+        },
+        include: [
+          {
+            model: Exam,
+            required: true,
+            where: { professorId: professorId },
           },
-          include: [
-            {
-              model: Exam,
-              required: true,
-              where: { professorId: professorId },
-            },
-          ],
-        })
+        ],
+      })
       : [];
 
     // Fetch appointments by classroomId and day
     const classroomAppointments = classroomId
       ? await Appointment.findAll({
-          where: {
-            startTime: { [Op.between]: [startOfDay, endOfDay] },
-            classroomId: classroomId,
+        where: {
+          startTime: { [Op.between]: [startOfDay, endOfDay] },
+          classroomId: classroomId,
+        },
+        include: [
+          {
+            model: Exam,
+            required: true,
           },
-          include: [
-            {
-              model: Exam,
-              required: true,
-            },
-          ],
-        })
+        ],
+      })
       : [];
 
     // Fetch appointments by groupId and day
     const groupAppointments = groupId
       ? await Appointment.findAll({
-          where: {
-            startTime: { [Op.between]: [startOfDay, endOfDay] },
-            groupId: groupId,
+        where: {
+          startTime: { [Op.between]: [startOfDay, endOfDay] },
+          groupId: groupId,
+        },
+        include: [
+          {
+            model: Exam,
+            required: true,
           },
-          include: [
-            {
-              model: Exam,
-              required: true,
-            },
-          ],
-        })
+        ],
+      })
       : [];
 
     // Combine results
@@ -349,14 +356,14 @@ exports.update = async (req, res) => {
   Appointment.update(req.body, {
     where: { appointmentId: appointment_id },
   })
-    .then((result) => {
+    .then(async (result) => {
       if (result == 1) {
         res.send({
           message: "Appointment was updated successfully.",
         });
-
-        try {
-          const emailTemplate = `
+        if (await sendEmails()) {
+          try {
+            const emailTemplate = `
             Buna ziua,
 
             Programarea dumneavoastra a fost modificata. Iata detaliile actualizate:
@@ -368,13 +375,14 @@ exports.update = async (req, res) => {
             Toate cele bune!
           `;
 
-          sendEmail({
-            to: bossUser.email,
-            subject: `Programare Modificata | ${appointment_id}`,
-            text: emailTemplate,
-          });
-        } catch (err) {
-          console.log(err);
+            sendEmail({
+              to: bossUser.email,
+              subject: `Programare Modificata | ${appointment_id}`,
+              text: emailTemplate,
+            });
+          } catch (err) {
+            console.log(err);
+          }
         }
       } else {
         res.status(400).send({
@@ -409,14 +417,14 @@ exports.delete = async (req, res) => {
   }
 
   Appointment.destroy({ where: { appointmentId: appointment_id } })
-    .then((result) => {
+    .then(async (result) => {
       if (result == 1) {
         res.send({
           message: "Appointment was deleted successfully.",
         });
-
-        try {
-          const emailTemplate = `
+        if (await sendEmails()) {
+          try {
+            const emailTemplate = `
             Buna ziua,
 
             Programarea dumneavoastra a fost stearsa. Cu urmatoarele informatii:
@@ -428,13 +436,14 @@ exports.delete = async (req, res) => {
             Toate cele bune!
           `;
 
-          sendEmail({
-            to: bossUser.email,
-            subject: `Programare Stearsa | ${appointment_id}`,
-            text: emailTemplate,
-          });
-        } catch (err) {
-          console.log(err);
+            sendEmail({
+              to: bossUser.email,
+              subject: `Programare Stearsa | ${appointment_id}`,
+              text: emailTemplate,
+            });
+          } catch (err) {
+            console.log(err);
+          }
         }
       } else {
         res.status(404).send({

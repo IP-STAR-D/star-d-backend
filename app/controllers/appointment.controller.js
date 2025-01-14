@@ -5,6 +5,7 @@ const Student = db.students;
 const Professor = db.professors;
 const Exam = db.exams;
 const Group = db.groups;
+const Classroom = db.classrooms;
 const AppSettings = db.appSettings;
 const Op = db.Sequelize.Op;
 const sendEmail = require("../utils/email");
@@ -22,7 +23,7 @@ const checkIfBoss = async (studentId) => {
 };
 
 const sendEmails = async () => {
-  let setting = await AppSettings.findOne({ name: 'sendEmails' });
+  let setting = await AppSettings.findOne({ name: "sendEmails" });
   return setting.value;
 };
 
@@ -31,19 +32,10 @@ exports.create = async (req, res) => {
   const { examId, groupId, classroomId, status, startTime, endTime } = req.body;
   const studentIsBoss = await checkIfBoss(req.user.id);
   if (req.user.role == "student" && !studentIsBoss) {
-    return res
-      .status(400)
-      .json({ message: "Student is not the leader of the group!" });
+    return res.status(400).json({ message: "Student is not the leader of the group!" });
   }
 
-  if (
-    !examId ||
-    !groupId ||
-    !classroomId ||
-    !startTime ||
-    !status ||
-    !endTime
-  ) {
+  if (!examId || !groupId || !classroomId || !startTime || !status || !endTime) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
@@ -54,7 +46,7 @@ exports.create = async (req, res) => {
         {
           model: Professor,
           as: "professor",
-          include: [{ model: User, as: "user", attributes: ["email"] }],
+          include: [{ model: User, as: "user" }],
         },
       ],
     });
@@ -65,9 +57,7 @@ exports.create = async (req, res) => {
 
     const professorEmail = exam.professor?.user?.email;
     if (!professorEmail) {
-      return res
-        .status(404)
-        .json({ message: "Associated professor not found or has no email" });
+      return res.status(404).json({ message: "Associated professor not found or has no email" });
     }
 
     // Creăm programarea
@@ -80,25 +70,31 @@ exports.create = async (req, res) => {
       endTime,
     });
 
+    const group = await Group.findByPk(groupId);
+    const classroom = await Classroom.findByPk(classroomId);
+
     if (await sendEmails()) {
       // Trimitem e-mail profesorului
       const emailTemplate = `
-      Buna ziua,
+      Stimat(a) ${exam.professor?.user?.firstName} ${exam.professor?.user?.lastName},
 
-      O nouă programare a fost creată:
+      O noua programare a fost creata.
 
-      - ID Programare: ${appointment.appointmentId}
-      - Examen: ${exam.class_name} (${exam.shortName})
-      - Grupa: ${groupId}
-      - Ora începerii: ${startTime}
-      - Ora finalizării: ${endTime}
+      Detalii despre programare:
+      - Examen: ${exam.class_name || "Necunoscut"}
+      - Grupa: ${group.groupName || "Necunoscut"}
+      - Sala: ${classroom.classroomName || "Necunoscut"}
+      - Status: ${translateStatus(status) || "Necunoscut"}
+      - Ora de incepere: ${new Date(startTime).toLocaleString("ro-RO")}
+      - Ora de incheiere: ${new Date(endTime).toLocaleString("ro-RO")}
 
-      Toate cele bune!
+      Cu respect,
+      Echipa STAR-D
     `;
 
       sendEmail({
         to: professorEmail,
-        subject: `Programare Creata | ${exam.shortName}`,
+        subject: `[Programari USV] Programare creata`,
         text: emailTemplate,
       });
     }
@@ -107,8 +103,7 @@ exports.create = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message:
-        err.message || "An error occurred while creating the appointment.",
+      message: err.message || "An error occurred while creating the appointment.",
     });
   }
 };
@@ -147,8 +142,7 @@ exports.findAll = async (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving Appointments.",
+        message: err.message || "Some error occurred while retrieving Appointments.",
       });
     });
 };
@@ -179,87 +173,69 @@ exports.findFiltered = async (req, res) => {
     // Fetch appointments by professorId and day
     const professorAppointments = professorId
       ? await Appointment.findAll({
-        where: {
-          startTime: { [Op.between]: [startOfDay, endOfDay] },
-        },
-        include: [
-          {
-            model: Exam,
-            required: true,
-            where: { professorId: professorId },
+          where: {
+            startTime: { [Op.between]: [startOfDay, endOfDay] },
           },
-        ],
-      })
+          include: [
+            {
+              model: Exam,
+              required: true,
+              where: { professorId: professorId },
+            },
+          ],
+        })
       : [];
 
     // Fetch appointments by classroomId and day
     const classroomAppointments = classroomId
       ? await Appointment.findAll({
-        where: {
-          startTime: { [Op.between]: [startOfDay, endOfDay] },
-          classroomId: classroomId,
-        },
-        include: [
-          {
-            model: Exam,
-            required: true,
+          where: {
+            startTime: { [Op.between]: [startOfDay, endOfDay] },
+            classroomId: classroomId,
           },
-        ],
-      })
+          include: [
+            {
+              model: Exam,
+              required: true,
+            },
+          ],
+        })
       : [];
 
     // Fetch appointments by groupId and day
     const groupAppointments = groupId
       ? await Appointment.findAll({
-        where: {
-          startTime: { [Op.between]: [startOfDay, endOfDay] },
-          groupId: groupId,
-        },
-        include: [
-          {
-            model: Exam,
-            required: true,
+          where: {
+            startTime: { [Op.between]: [startOfDay, endOfDay] },
+            groupId: groupId,
           },
-        ],
-      })
+          include: [
+            {
+              model: Exam,
+              required: true,
+            },
+          ],
+        })
       : [];
 
     // Combine results
-    const combinedAppointments = [
-      ...professorAppointments,
-      ...classroomAppointments,
-      ...groupAppointments,
-    ];
+    const combinedAppointments = [...professorAppointments, ...classroomAppointments, ...groupAppointments];
 
     // Remove duplicates based on ID
     const uniqueAppointments = Array.from(
-      new Map(
-        combinedAppointments.map((appt) => [appt.appointmentId, appt])
-      ).values()
+      new Map(combinedAppointments.map((appt) => [appt.appointmentId, appt])).values()
     );
 
     if (uniqueAppointments.length > 0) {
       const matches = uniqueAppointments.map((appointment) => {
         const criteria = [];
-        if (
-          professorAppointments.some(
-            (appt) => appt.appointmentId === appointment.appointmentId
-          )
-        ) {
+        if (professorAppointments.some((appt) => appt.appointmentId === appointment.appointmentId)) {
           criteria.push("professor");
         }
-        if (
-          classroomAppointments.some(
-            (appt) => appt.appointmentId === appointment.appointmentId
-          )
-        ) {
+        if (classroomAppointments.some((appt) => appt.appointmentId === appointment.appointmentId)) {
           criteria.push("classroom");
         }
-        if (
-          groupAppointments.some(
-            (appt) => appt.appointmentId === appointment.appointmentId
-          )
-        ) {
+        if (groupAppointments.some((appt) => appt.appointmentId === appointment.appointmentId)) {
           criteria.push("group");
         }
         return {
@@ -272,9 +248,7 @@ exports.findFiltered = async (req, res) => {
         matches: matches,
       });
     } else {
-      res
-        .status(404)
-        .send({ message: "No appointments found for the provided criteria." });
+      res.status(404).send({ message: "No appointments found for the provided criteria." });
     }
   } catch (err) {
     res.status(500).send({
@@ -334,29 +308,45 @@ exports.findOne = (req, res) => {
     });
 };
 
+function translateStatus(status) {
+  switch (status) {
+    case "scheduled":
+      return "Programat";
+    case "rejected":
+      return "Respins";
+    case "pending":
+      return "In asteptare";
+    default:
+      return status;
+  }
+}
+
+function getActionStatus(status) {
+  switch (status) {
+    case "scheduled":
+      return "acceptata";
+    case "rejected":
+      return "respinsa";
+    default:
+      return "modificata";
+  }
+}
+
 // Update a Appointment by the id in the request
 exports.update = async (req, res) => {
   const appointment_id = req.params.id;
   const app = req.body;
 
-  let bossUser = "";
-
-  try {
-    const bossStudent = await Student.findOne({
-      where: { groupId: app.groupId },
-    });
-
-    bossUser = await User.findByPk(bossStudent.userId, {
-      attributes: ["email"],
-    });
-  } catch (err) {
-    console.log(err);
-  }
-
   Appointment.update(req.body, {
     where: { appointmentId: appointment_id },
   })
     .then(async (result) => {
+      const group = await Group.findByPk(app.groupId);
+      const classroom = await Classroom.findByPk(app.classroomId);
+      const exam = await Exam.findByPk(app.examId);
+
+      const bossUser = await User.findByPk(group.bossId);
+
       if (result == 1) {
         res.send({
           message: "Appointment was updated successfully.",
@@ -364,20 +354,25 @@ exports.update = async (req, res) => {
         if (await sendEmails()) {
           try {
             const emailTemplate = `
-            Buna ziua,
+            Stimat(a) ${bossUser.firstName} ${bossUser.lastName},
 
-            Programarea dumneavoastra a fost modificata. Iata detaliile actualizate:
+            Una din programarile dumneavoastra a fost ${getActionStatus(app.status)}.
 
-            - ID Programare: ${appointment_id}
-            - Status: ${app.status || "Nespecificat"}
-            - Ora: ${app.start_time || "Nespecificat"}
+            Detalii despre programare:
+            - Examen: ${exam.class_name || "Necunoscut"}
+            - Grupa: ${group.groupName || "Necunoscut"}
+            - Sala: ${classroom.classroomName || "Necunoscut"}
+            - Status: ${translateStatus(app.status) || "Necunoscut"}
+            - Ora de incepere: ${new Date(app.startTime).toLocaleString("ro-RO")}
+            - Ora de incheiere: ${new Date(app.endTime).toLocaleString("ro-RO")}
 
-            Toate cele bune!
-          `;
+            Cu respect,
+            Echipa STAR-D
+            `;
 
             sendEmail({
               to: bossUser.email,
-              subject: `Programare Modificata | ${appointment_id}`,
+              subject: `[Programari USV] Programare ${getActionStatus(req.body.status)}`,
               text: emailTemplate,
             });
           } catch (err) {
@@ -402,22 +397,14 @@ exports.delete = async (req, res) => {
   const appointment_id = req.params.id;
   const app = req.body;
 
-  let bossUser = "";
-
-  try {
-    const bossStudent = await Student.findOne({
-      where: { groupId: app.groupId },
-    });
-
-    bossUser = await User.findByPk(bossStudent.userId, {
-      attributes: ["email"],
-    });
-  } catch (err) {
-    console.log(err);
-  }
-
   Appointment.destroy({ where: { appointmentId: appointment_id } })
     .then(async (result) => {
+      const group = await Group.findByPk(app.groupId);
+      const classroom = await Classroom.findByPk(app.classroomId);
+      const exam = await Exam.findByPk(app.examId);
+
+      const bossUser = await User.findByPk(group.bossId);
+
       if (result == 1) {
         res.send({
           message: "Appointment was deleted successfully.",
@@ -425,20 +412,25 @@ exports.delete = async (req, res) => {
         if (await sendEmails()) {
           try {
             const emailTemplate = `
-            Buna ziua,
+            Stimat(a) ${bossUser.firstName} ${bossUser.lastName},
 
-            Programarea dumneavoastra a fost stearsa. Cu urmatoarele informatii:
+            Una din programarile dumneavoastra a fost stearsa.
 
-            - ID Programare: ${appointment_id}
-            - Status: ${app.status || "Nespecificat"}
-            - Ora: ${app.start_time || "Nespecificat"}
+            Detalii despre programare:
+            - Examen: ${exam.class_name || "Necunoscut"}
+            - Grupa: ${group.groupName || "Necunoscut"}
+            - Sala: ${classroom.classroomName || "Necunoscut"}
+            - Status: ${translateStatus(app.status) || "Necunoscut"}
+            - Ora de incepere: ${new Date(app.startTime).toLocaleString("ro-RO")}
+            - Ora de incheiere: ${new Date(app.endTime).toLocaleString("ro-RO")}
 
-            Toate cele bune!
+            Cu respect,
+            Echipa STAR-D
           `;
 
             sendEmail({
               to: bossUser.email,
-              subject: `Programare Stearsa | ${appointment_id}`,
+              subject: `[Programari USV] Programare stearsa`,
               text: emailTemplate,
             });
           } catch (err) {

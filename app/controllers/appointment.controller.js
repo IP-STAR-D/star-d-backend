@@ -94,7 +94,7 @@ exports.create = async (req, res) => {
 
       sendEmail({
         to: professorEmail,
-        subject: `[Programari USV] Programare creata`,
+        subject: `[Programari USV] ${exam.shortName} | Programare creata`,
         text: emailTemplate,
       });
     }
@@ -372,7 +372,7 @@ exports.update = async (req, res) => {
 
             sendEmail({
               to: bossUser.email,
-              subject: `[Programari USV] Programare ${getActionStatus(req.body.status)}`,
+              subject: `[Programari USV] ${exam.shortName} | Programare ${getActionStatus(req.body.status)}`,
               text: emailTemplate,
             });
           } catch (err) {
@@ -430,7 +430,7 @@ exports.delete = async (req, res) => {
 
             sendEmail({
               to: bossUser.email,
-              subject: `[Programari USV] Programare stearsa`,
+              subject: `[Programari USV] ${exam.shortName} | Programare stearsa`,
               text: emailTemplate,
             });
           } catch (err) {
